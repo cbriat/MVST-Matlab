@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use MVST, please cite it as below."
+title: "Matrix-Valued Systems Toolbox (MVST)"
+version: 1.0.0-rc1
+date-released: 2026-10-27
+# doi: add when a DOI (e.g. Zenodo) is minted
+license: MIT
+authors:
+  - family-names: Briat
+    given-names: Corentin
+# repository-code: add the public repository URL at release
+abstract: "MATLAB toolbox for the analysis and synthesis of linear matrix-valued (impulsive and stochastic) dynamical systems: stability, stabilization, linear-cost optimal control, covariance steering, dissipativity, games, and positive systems."
+# The toolbox is cited directly (author ruling 2026-10-27): no preferred-citation
+# redirect while the companion monograph is unpublished; add one at publication.
