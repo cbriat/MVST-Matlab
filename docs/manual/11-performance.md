@@ -1,6 +1,6 @@
 # 11. Further performance measures
 
-[Manual index](index.md) | Prev: [Positive systems](10-positive-systems.md) | Next: [Book reproduction](12-book-reproduction.md)
+[Manual index](index.md) | Prev: [Positive systems](10-positive-systems.md) | Next: [API reference](13-api-reference.md)
 
 This chapter covers the further performance measures (`mvst_perf`, method
 `S.perf`, and its dwell-time backend `mvst_perf_dwell`), which correspond to the

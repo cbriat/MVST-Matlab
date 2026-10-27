@@ -10,7 +10,7 @@ This manual is written in author order: it starts from installation, then
 building a system, then walks through the analysis and synthesis problems in
 the same sequence the monograph presents them (stability, stabilization,
 optimal control, steering, dissipativity, games, synthesis, positive systems,
-further performance measures), and closes with book reproduction and a full API
+further performance measures), and closes with a full API
 reference.
 
 Every code snippet in this manual has been run in MATLAB (R2025a) and is shown
@@ -73,7 +73,6 @@ equations and margin conventions, opens [Systems](02-systems.md) and
 | 09 | [Dissipative synthesis](09-dissipative-synthesis.md) | dissipative state-feedback SOS | Dissipativity-Based Synthesis |
 | 10 | [Positive systems](10-positive-systems.md) | the copositive-LP family | Linear Positive Systems |
 | 11 | [Further performance measures](11-performance.md) | H2, energy-to-peak, peak, peak-to-peak, dwell-time tubes | Further Performance Measures |
-| 12 | [Book reproduction](12-book-reproduction.md) | `run_all`, the runners, `MVST_FIGDIR`, the output folder | (all) |
 | 13 | [API reference](13-api-reference.md) | every public function with its help summary | (all) |
 
 ## Conventions used in this manual

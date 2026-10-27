@@ -30,8 +30,6 @@
   {\left(\begin{smallmatrix}}%
   {\end{smallmatrix}\right)}
 
-% illustrative book-build data macro referenced in the Book-reproduction chapter
-\providecommand{\GameGammaSd}{\text{[value]}}
 
 \lstdefinestyle{matlabstyle}{
   language=Matlab, basicstyle=\ttfamily\small,
@@ -89,7 +87,7 @@ This manual is written in author order: it starts from installation, then
 building a system, then walks through the analysis and synthesis problems in
 the same sequence the monograph presents them (stability, stabilization,
 optimal control, steering, dissipativity, games, synthesis, positive systems,
-further performance measures), and closes with book reproduction and a full API
+further performance measures), and closes with a full API
 reference.
 
 Every code snippet in this manual has been run in MATLAB (R2025a) and is shown
@@ -170,7 +168,6 @@ Chapter & File & Topic & Book chapter \\
 09 & \protect\hyperlink{chap:09-dissipative-synthesis}{Dissipative synthesis} & dissipative state-feedback SOS & Dissipativity-Based Synthesis \\
 10 & \protect\hyperlink{chap:10-positive-systems}{Positive systems} & the copositive-LP family & Linear Positive Systems \\
 11 & \protect\hyperlink{chap:11-performance}{Further performance measures} & H2, energy-to-peak, peak, peak-to-peak, dwell-time tubes & Further Performance Measures \\
-12 & \protect\hyperlink{chap:12-book-reproduction}{Book reproduction} & \code{run\_all}, the runners, \code{MVST\_FIGDIR}, the output folder & (all) \\
 13 & \protect\hyperlink{chap:13-api-reference}{API reference} & every public function with its help summary & (all) \\
 \bottomrule
 \end{longtable}
@@ -435,7 +432,7 @@ Tests that need a solver which is not on the path are not failures: they are
 reported as \code{SKIPPED} lines and counted separately. The exit code is nonzero
 only if a test truly fails. Without \code{mvst\_setup} (library only) the battery
 therefore reports many skipped tests and no failure; after \code{mvst\_setup} the
-solver-dependent tests run. A full run takes about 10 minutes; the tail of the
+solver-dependent tests run. A full run takes a few minutes; the tail of the
 report looks like:
 
 \begin{lstlisting}[style=outputstyle]
@@ -4062,171 +4059,6 @@ disturbance energy than the average-power measures suggest.
 
 The exact engines used in this case study need only base MATLAB; the dwell-time
 backend \code{mvst\_perf\_dwell} needs SOSTOOLS and an SDP backend.
-
-
-\hypertarget{chap:12-book-reproduction}{%
-\chapter{Book reproduction}\label{chap:12-book-reproduction}}
-
-This chapter explains how the toolbox regenerates every figure and every
-printed number of the companion monograph, where the outputs are written, and
-(for the development tree) how a golden regression harness freezes those
-numbers.
-
-\hypertarget{the-figure-and-data-pipeline}{%
-\section{The figure and data pipeline}\label{the-figure-and-data-pipeline}}
-
-The reproduction layer rests on one idea: the numbers the book prints and the
-numbers the code computes are the \textbf{same} numbers, carried across by generated
-files. There are three stages.
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  An \textbf{example script} (\code{examples/ex\_*.m}, \code{examples/fig\_*.m}, or
-  \code{examples/comp\_*.m}) sets up a system, calls the analysis or synthesis
-  engines, and produces two kinds of artifact.
-\item
-  Every plotted figure is exported as a vector PDF to the output folder.
-\item
-  Every scalar, matrix, or string the book quotes in its running text is
-  written as a LaTeX macro to the \code{data/} subfolder of the output folder.
-\end{enumerate}
-
-The output folder is returned by \code{mvst\_figdir}, which is the same for every
-example. In order of precedence it is the environment variable \code{MVST\_FIGDIR}
-when set and nonempty, and otherwise \code{./figures} under the current folder. The
-folder and its \code{data/} subfolder are created when missing, so the examples run
-standalone from any clone:
-
-\begin{lstlisting}[style=matlabstyle]
-setenv('MVST_FIGDIR', fullfile(tempdir, 'mvst_out'));
-mvst_figdir('data')        % -> .../mvst_out/data
-\end{lstlisting}
-
-The book manuscript then \code{\textbackslash{}input}s the \code{data/*.tex} files and refers to
-each quantity by macro name. A sentence such as "the critical level is
-\(\gamma^\star = \GameGammaSd\)" resolves, at LaTeX compile time, to the value the
-MATLAB run wrote. No number is transcribed by hand, so the text cannot drift
-away from the code.
-
-Schematically, for one example:
-
-\begin{lstlisting}[style=outputstyle]
-ex_game_sd.m  --->  <figdir>/ex_game_sd.pdf          (a figure in the book)
-              --->  <figdir>/data/game_sd.tex        (\def\GameGammaSd{...})
-                         |
-                         v
-              Book_Springer.tex \input{data/game_sd.tex}
-                         |
-                         v
-              "...gamma* = \GameGammaSd ..."   (typeset value)
-\end{lstlisting}
-
-The data macros are written through \code{mvst\_texdata}, which opens a \code{.tex} file
-and exposes \code{.num(name,value)} for a formatted scalar, \code{.mat(name,M)} for a
-LaTeX \code{bmatrix}, and \code{.str(name,text)} for a string, then \code{.close()}. Matrices
-are formatted by \code{mvst\_fmtmat}. This writer is the single choke point for
-everything the book quotes.
-
-\hypertarget{figures-and-the-export-layer}{%
-\section{Figures and the export layer}\label{figures-and-the-export-layer}}
-
-The figure and export layer lives in its own folder, \code{bookutil/}, separate from
-the engine layer \code{lib/}: nothing in the analysis engines depends on it, so the
-solvers can be used headless without ever loading a plotting routine.
-\code{mvst\_setup} adds \code{bookutil/} to the path; only \code{mvst\_figdir} (the output
-folder, see above) stays in \code{lib/}.
-
-\begin{itemize}
-\tightlist
-\item
-  \code{mvst\_gemcolors}, \code{mvst\_latexdefaults}, and \code{mvst\_figstyle} set the MATLAB
-  "gem" color order, route all text through the LaTeX interpreter, and force a
-  white background with black text before export;
-\item
-  \code{mvst\_savepdf} applies the white style and writes a cropped vector PDF, so the
-  exports are correct even when MATLAB itself is in dark mode;
-\item
-  \code{mvst\_texdata} and \code{mvst\_fmtmat} write the data macros;
-\item
-  \code{mvst\_stabfig}, \code{mvst\_stabtable}, \code{mvst\_steer\_components}, and
-  \code{mvst\_steer\_ellipse} draw the recurring chapter figures and generated table
-  rows.
-\end{itemize}
-
-\hypertarget{the-runners}{%
-\section{The runners}\label{the-runners}}
-
-Each book chapter has a per-chapter runner at the top level of \code{matlab/}. A
-runner executes its chapter's example scripts with a fresh workspace (through
-\code{mvst\_runscripts}), writing the PDFs and data macros described above.
-
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.25}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.25}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.25}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.25}}@{}}
-\toprule
-Runner & Regenerates (examples) & Needs SOS solver & Rough runtime \\
-\midrule
-\endhead
-\code{run\_stability} & dwell-scalar, Levy, rate-SOS, sampled-data-SOS, stabz, switched-SOS & yes (the \code{*\_sos}) & minutes \\
-\code{run\_stabilization} & the \code{ex\_stabz\_*} family (CT, DT, delay, MJLS, sampled-data, NCS, ...) & one SOS script & tens of seconds \\
-\code{run\_oc} & time-varying MJLS / sampled / switched costs and trajectories, the four horizon figures & no & tens of seconds \\
-\code{run\_steering} & covariance steering for MJLS, Poisson, sampled-data, switched & no & seconds \\
-\code{run\_dissipativity} & dissipativity for MJLS, Poisson, sampled-data, switched (plus time-varying) & no & tens of seconds \\
-\code{run\_game} & H-infinity game level for the five classes plus the gamma iteration & no & tens of seconds \\
-\code{run\_computational} & ARE, MJLS, and the SOS optimal-control / dissipativity / game examples & yes & minutes \\
-\code{run\_vdiss} & vector-dissipativity example & no & seconds \\
-\bottomrule
-\end{longtable}
-
-The runtimes are indicative: the base-MATLAB runners finish in seconds to a
-minute, while the SOS runs (\code{run\_computational} and the \code{*\_sos} scripts) are
-dominated by the external SDP solver and take several minutes.
-
-\code{run\_all} is the thin wrapper that calls every runner plus the remaining
-standalone example scripts (the cones, positive-systems, and performance
-examples):
-
-\begin{lstlisting}[style=matlabstyle]
-run_all
-\end{lstlisting}
-
-The SOS / SDP examples require an SDP solver on the path (see
-\protect\hyperlink{chap:01-getting-started}{Getting started}); the rest need only base MATLAB. To
-regenerate just one chapter, call its runner, for example \code{run\_dissipativity}.
-Build the book first if you will typeset it: the data macros are \code{\textbackslash{}input} by the
-manuscript, and some example scripts cross-reference the built document.
-
-\hypertarget{the-golden-regression-harness-development-tree-only}{%
-\section{The golden regression harness (development tree only)}\label{the-golden-regression-harness-development-tree-only}}
-
-The development tree carries a golden-data regression harness tied to the
-book's figure data. It is not part of the release battery (the release battery
-is the 26 unit-test suites run by \code{run\_all\_tests}, see
-\protect\hyperlink{chap:01-getting-started}{Getting started}), and it is left out of the release
-tree.
-
-The idea is mechanical. The book quotes hundreds of computed numbers, and a
-refactor of the numerical core must not change any of them. When the code was
-known good, the whole data-macro corpus was captured into \code{tests/golden/data/}.
-\code{tests/mvst\_regress} re-parses every golden file and the live \code{data/*.tex}
-files and compares them macro by macro with numeric tolerance (default relative
-\code{1e-6}, absolute \code{1e-12}); on any drift it raises \code{mvst:regress:failed}.
-\code{tests/run\_regress} is the strict \code{-batch} wrapper. Drift can be inspected
-without failing through report mode:
-
-\begin{lstlisting}[style=matlabstyle]
-rep = mvst_regress('Report', true);
-rep.files(find(~[rep.files.pass], 1)).diffs   % the first failing file's diffs
-\end{lstlisting}
-
-A change that is intended to alter a printed number requires re-baselining on
-purpose: regenerate the live data, review the report so that only the expected
-macros moved, re-capture the snapshot with a refreshed \code{tests/golden/MANIFEST.md},
-and commit the new golden files together with the code change that caused them.
 
 
 \hypertarget{chap:13-api-reference}{%

@@ -1,6 +1,6 @@
 # 13. API reference
 
-[Manual index](index.md) | Prev: [Book reproduction](12-book-reproduction.md)
+[Manual index](index.md) | Prev: [Further performance measures](11-performance.md)
 
 Every public function of the toolbox, grouped by area, with the first line of
 its help (`help <name>` for the full text). The table below is generated

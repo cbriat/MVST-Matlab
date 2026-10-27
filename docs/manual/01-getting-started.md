@@ -189,7 +189,7 @@ Tests that need a solver which is not on the path are not failures: they are
 reported as `SKIPPED` lines and counted separately. The exit code is nonzero
 only if a test truly fails. Without `mvst_setup` (library only) the battery
 therefore reports many skipped tests and no failure; after `mvst_setup` the
-solver-dependent tests run. A full run takes about 10 minutes; the tail of the
+solver-dependent tests run. A full run takes a few minutes; the tail of the
 report looks like:
 
 ```

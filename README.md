@@ -15,7 +15,7 @@ stochastic) dynamical systems, covering the book's chapters end to end:
 - **zero-sum differential games** (H-infinity level),
 - **further performance measures** (H2, energy-to-peak, peak-to-peak),
 - **linear positive systems** (copositive-LP analysis and synthesis),
-- **higher-order systems** (see `run_higher`).
+- **higher-order systems**.
 
 - **routed H-infinity norm and passivity** (`S.hinfnorm()`, `S.passivity()`):
   uniform result structs with certificates and indices; exact imaginary-axis
@@ -159,23 +159,10 @@ and optimization in MATLAB", CACSD 2004), as its license requests.
 | `examples/`       | Example systems and figure scripts (one per book example).      |
 | `tests/`          | Unit-test suites (the release battery). |
 | `mvst_setup.m`    | Path setup + solver doctor (top level).                         |
-| `run_all.m`       | Regenerate every figure and data file of the book.              |
-| `run_*.m`         | Per-chapter figure runners (see below).                         |
 
-Per-chapter runners: `run_stability`, `run_stabilization`, `run_oc`,
-`run_steering`, `run_dissipativity`, `run_game`, `run_computational`,
-`run_higher`, `run_vdiss`.
+## Figure output
 
-## Reproducing the book figures
-
-From the `matlab/` directory:
-
-```matlab
-run_all              % every figure + data macro (several minutes end to end)
-run_dissipativity    % ... or just one chapter's figures
-```
-
-Vector PDFs (white background, black text, so exports are correct even in dark
+When an example script is run, vector PDFs (white background, black text, so exports are correct even in dark
 mode) are written to `figures/` under the current folder (or to the folder named
 by the environment variable `MVST_FIGDIR`, see `mvst_figdir`), and the LaTeX data
 macros the book `\input`s are written to its `data/` subfolder. The SOS/SDP examples require an SDP solver on
@@ -197,8 +184,8 @@ or from the shell:
 matlab -batch "cd tests; run_all_tests"
 ```
 
-The battery has 26 classdef `matlab.unittest` suites (about 330 tests; a full run
-takes about 10 minutes), all auto-discovered so a new `t*.m` `TestCase` is
+The battery has 26 classdef `matlab.unittest` suites (about 250 tests; a full run
+takes a few minutes), all auto-discovered so a new `t*.m` `TestCase` is
 picked up without editing the harness. The development tree additionally
 carries a golden-data regression harness tied to the book's figure data; it is
 not part of the release battery. Individual suites can be run with `runtests('tpos')` etc.
